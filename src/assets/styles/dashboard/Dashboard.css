@@ -1,17 +1,17 @@
 :root {
-  --background-color: #030303; /* Define a variable for background color */
-  --border-radius: 10px; /* Define a variable for border radius */
-  --text-color: #ffffff; /* Define a variable for text color */
-  --heading-font-size: 32px; /* Define a variable for heading font size */
-  --font-size: 16px; /* Define a variable for general font size */
-  --font-family: "Poppins", sans-serif; /* Define a variable for font family */
-  --radio-button-bg: #ffffff; /* Define a variable for radio button background color */
-  --selected-radio-button-bg: #6741d9; /* Define a variable for selected radio button color */
-  --text-field-border: #ffffff; /* Define a variable for text field border color */
-  --graph-bars-color: #f0c3f1; /* Define a variable for graph bars color */
-  --bar-axis-color: #ffffff; /* Define a variable for bar axis color */
-  --save-button-bg: #6741d9; /* Define a variable for save button background color */
-  --save-button-hover-bg: #f0c3f1; /* Define a variable for save button hover background color */
+  --background-color: #030303;
+  --border-radius: 10px;
+  --text-color: #ffffff;
+  --heading-font-size: 32px;
+  --font-size: 16px;
+  --font-family: "Poppins", sans-serif;
+  --radio-button-bg: #ffffff;
+  --selected-radio-button-bg: #6741d9;
+  --text-field-border: #ffffff;
+  --graph-bars-color: #f0c3f1;
+  --bar-axis-color: #ffffff;
+  --save-button-bg: #6741d9;
+  --save-button-hover-bg: #f0c3f1;
 }
 
 .dashboard-container {
@@ -38,7 +38,7 @@
 
 @media only screen and (max-width: 600px) {
   .price-input {
-    flex-direction: column; /* Display in a column for smaller screens */
+    flex-direction: column; 
   }
 }
 

@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from "react";
-import "../components/dashboard/Dashboard.css";
 import ColumnChart from "../components/dashboard/ColumnChart";
 import { FaSignOutAlt } from "react-icons/fa";
 import Loader from "../components/Loader/Loader";
+import "../assets/styles/dashboard/Dashboard.css"
 
 const Dashboard = ({ userData }) => {
   const [adminDetails, setAdminDetails] = useState({});
   const [editedPrices, setEditedPrices] = useState({});
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (userData && userData.id) {
       fetchAdminDetails(userData.id);
     }
   }, [userData]);
+  
+
 
   const fetchAdminDetails = async (userId) => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/account/admin/${userId}`
-      );
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/account/admin/${userId}`);
       const data = await response.json();
 
       if (response.status === 200 && data.response === "Success") {
@@ -38,27 +38,38 @@ const Dashboard = ({ userData }) => {
   };
 
   const handlePriceEdit = (category, value) => {
-    const updatedPrices = { ...editedPrices, [category]: value };
-    setEditedPrices(updatedPrices);
+    setEditedPrices((prevPrices) => ({
+      ...prevPrices,
+      [category]: +value,
+    }));
     setSaveButtonDisabled(false);
   };
 
+
   const handleSavePrices = async () => {
+    const modifiedCategories = {};
+Object.entries(editedPrices).forEach(([key, value]) => {
+  if (key.startsWith("category_") && value !== adminDetails.amount[key]) {
+    modifiedCategories[key] = value;
+  }
+});
+
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/account/admin/${userData.id}`,
+        `${process.env.REACT_APP_API_BASE_URL}/account/admin/${userData.id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            amount: editedPrices,
+            amount: modifiedCategories,
           }),
         }
       );
 
       const data = await response.json();
+      console.log(data);
 
       if (response.status === 200 && data.response === "Success") {
         fetchAdminDetails(userData.id);
@@ -70,6 +81,7 @@ const Dashboard = ({ userData }) => {
       console.error("Error during handleSavePrices:", error);
     }
   };
+
   const chartData = {
     labels: Object.keys(editedPrices).filter((key) =>
       key.startsWith("category_")

@@ -1,38 +1,47 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { loginUser } from "../services/api";
+import Input from "../components/common/Input";
+import PasswordToggle from "../components/common/PasswordToggle";
+import "../assets/styles/login/Login.css";
+import { ToastContainer, toast } from "react-toastify";
 
 const Login = ({ handleLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    if (id === "username") {
+      setUsername(value);
+    } else if (id === "password") {
+      setPassword(value);
+    }
+  };
+
   const handleSignIn = async () => {
+    // Check for empty fields
+    if (!username || !password) {
+      toast.error("Please enter both username and password");
+      return;
+    }
+    setLoading(true);
+
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/account/admin/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username,
-            password,
-          }),
-        }
-      );
+      const { status, data } = await loginUser(username, password);
 
-      const data = await response.json();
-
-      if (response.status === 200 && data.response === "Success") {
+      if (status === 200 && data.response === "Success") {
         localStorage.setItem("token", data.data.token);
 
         const decodedToken = parseJwt(data.data.token);
-        console.log({ decodedToken });
         handleLogin({
           id: decodedToken.user_id,
           username: decodedToken.username,
@@ -40,11 +49,13 @@ const Login = ({ handleLogin }) => {
 
         navigate("/dashboard");
       } else {
-        setError("Invalid username or password");
+        toast.error("Invalid username or password");
       }
     } catch (error) {
-      console.error("Error during login:", error);
-      setError("Error during login. Please try again.");
+      console.error("Error during sign-in:", error);
+      toast.error("Error during sign-in. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,41 +69,41 @@ const Login = ({ handleLogin }) => {
 
   return (
     <div className="login-container">
+      <ToastContainer />
       <h1 className="login-heading">Venue Admin Login</h1>
-      {error && <p className="login-error">{error}</p>}
-      <div>
-        <input
-          className="login-input"
-          type="text"
-          id="username"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </div>
+      <Input
+        type="text"
+        id="username"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => {
+          handleInputChange(e);
+        }}
+      />
+
       <div className="password-input">
-        <input
-          className="login-input"
+        <PasswordToggle
+          showPassword={showPassword}
+          togglePassword={togglePassword}
+        />
+
+        <Input
           type={showPassword ? "text" : "password"}
           id="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            handleInputChange(e);
+          }}
         />
-        {showPassword ? (
-          <FaEyeSlash
-            onClick={() => setShowPassword(!showPassword)}
-            className="eye-icon"
-          />
-        ) : (
-          <FaEye
-            onClick={() => setShowPassword(!showPassword)}
-            className="eye-icon"
-          />
-        )}
       </div>
-      <button className="login-button" onClick={handleSignIn}>
-        Sign In
+
+      <button
+        className="login-button"
+        onClick={handleSignIn}
+        disabled={loading}
+      >
+        {loading ? "Signing In..." : "Sign In"}
       </button>
       <p className="new-registration-text">New Registration ?</p>
     </div>

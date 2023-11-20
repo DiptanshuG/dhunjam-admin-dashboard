@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const App = () => {
   const [loggedIn, setLoggedIn] = useState(false);
