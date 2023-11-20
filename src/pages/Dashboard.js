@@ -5,6 +5,7 @@ import Loader from "../components/Loader/Loader";
 import "../assets/styles/dashboard/Dashboard.css";
 import { fetchAdminDetails, updateAdminPrices } from "../services/api";
 import PriceInput from "../components/dashboard/PriceInput";
+import { ToastContainer } from "react-toastify";
 
 const Dashboard = ({ userData }) => {
   const [adminDetails, setAdminDetails] = useState({});
@@ -24,13 +25,13 @@ const Dashboard = ({ userData }) => {
     if (adminData) {
       setAdminDetails(adminData);
       setEditedPrices(adminData.amount);
+      setSaveButtonDisabled(adminData.charge_customers === false);
     }
     setLoading(false);
   };
 
   const handlePriceEdit = (category, value) => {
     const numericValue = +value;
-
     // Check if the category is "charge_customers"
     if (category === "charge_customers") {
       setAdminDetails((details) => ({
@@ -56,15 +57,7 @@ const Dashboard = ({ userData }) => {
       const minAllowed = minValues[category];
       const isValid = numericValue >= minAllowed;
 
-      // Enable save button only if all values are higher than the minimum values
-      const areAllValuesValid = Object.entries(minValues).every(
-        ([key, minValue]) => {
-          const currentValue = editedPrices[key] || 0;
-          return currentValue >= minValue;
-        }
-      );
-
-      setSaveButtonDisabled(!isValid || !areAllValuesValid);
+      setSaveButtonDisabled(!isValid);
     } else {
       // Enable save button for other categories
       setSaveButtonDisabled(false);
@@ -77,17 +70,23 @@ const Dashboard = ({ userData }) => {
   };
 
   const handleSavePrices = async () => {
-    const modifiedCategories = {};
-    Object.entries(editedPrices).forEach(([key, value]) => {
-      if (key.startsWith("category_") && value !== adminDetails.amount[key]) {
-        modifiedCategories[key] = value;
-      }
-    });
+    try {
+      const modifiedCategories = {};
+      Object.entries(editedPrices).forEach(([key, value]) => {
+        if (key.startsWith("category_") && value !== adminDetails.amount[key]) {
+          modifiedCategories[key] = value;
+        }
+      });
+      const success = await updateAdminPrices(userData.id, modifiedCategories);
 
-    const success = await updateAdminPrices(userData.id, modifiedCategories);
-    if (success) {
-      fetchAdminData(userData.id);
-      setSaveButtonDisabled(true);
+      if (success) {
+        setTimeout(() => {
+          fetchAdminData(userData.id);
+        }, 2000);
+        setSaveButtonDisabled(true);
+      }
+    } catch (error) {
+      console.error("Error saving prices and fetching admin data:", error);
     }
   };
 
@@ -110,6 +109,8 @@ const Dashboard = ({ userData }) => {
 
   return (
     <div className="dashboard-container">
+      <ToastContainer />
+
       <div>
         <h1 className="dashboard-heading">
           {adminDetails.name}, {adminDetails.location} on Dhun Jam
@@ -120,7 +121,9 @@ const Dashboard = ({ userData }) => {
           adminDetails={adminDetails}
         />
         <div className="centered-chart-container">
-          <ColumnChart chartData={chartData} />
+          {adminDetails.charge_customers && (
+            <ColumnChart chartData={chartData} />
+          )}
         </div>
 
         <button

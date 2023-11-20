@@ -1,3 +1,5 @@
+import { toast } from "react-toastify";
+
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const loginUser = async (username, password) => {
@@ -53,6 +55,11 @@ export const updateAdminPrices = async (userId, modifiedCategories) => {
 
     const data = await response.json();
 
+    if (data.server_err_msg != null && data.server_err_msg) {
+      toast.error(data.server_err_msg);
+    } else {
+      toast.success("Prices saved successfully!");
+    }
     if (response.status === 200 && data.response === "Success") {
       return true;
     } else {

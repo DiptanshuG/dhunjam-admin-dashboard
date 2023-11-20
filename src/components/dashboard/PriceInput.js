@@ -5,7 +5,7 @@ const PriceInput = ({ editedPrices, handlePriceEdit, adminDetails }) => {
     <div className="inputs-container">
       <div className="price-input">
         <label className="amount-label">
-          Do you want to change your
+          Do you want to charge your
           <br /> customers for requesting songs?
         </label>
         <div className="radio-buttons">
