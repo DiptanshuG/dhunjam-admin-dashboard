@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -17,6 +17,28 @@ const App = () => {
     setUserData(data);
   };
 
+  useEffect(() => {
+    // Check if a token exists in localStorage
+    const storedToken = localStorage.getItem("token");
+
+    if (storedToken) {
+      const decodedToken = parseJwt(storedToken);
+
+      handleLogin({
+        id: decodedToken.user_id,
+        username: decodedToken.username,
+      });
+    }
+  }, []);
+
+  const parseJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split(".")[1]));
+    } catch (e) {
+      return null;
+    }
+  };
+
   return (
     <Router>
       <Routes>
@@ -30,7 +52,6 @@ const App = () => {
             )
           }
         />
-        <Route></Route>
         <Route
           path="/dashboard"
           element={

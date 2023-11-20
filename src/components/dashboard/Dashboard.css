@@ -1,0 +1,150 @@
+:root {
+  --background-color: #030303; /* Define a variable for background color */
+  --border-radius: 10px; /* Define a variable for border radius */
+  --text-color: #ffffff; /* Define a variable for text color */
+  --heading-font-size: 32px; /* Define a variable for heading font size */
+  --font-size: 16px; /* Define a variable for general font size */
+  --font-family: "Poppins", sans-serif; /* Define a variable for font family */
+  --radio-button-bg: #ffffff; /* Define a variable for radio button background color */
+  --selected-radio-button-bg: #6741d9; /* Define a variable for selected radio button color */
+  --text-field-border: #ffffff; /* Define a variable for text field border color */
+  --graph-bars-color: #f0c3f1; /* Define a variable for graph bars color */
+  --bar-axis-color: #ffffff; /* Define a variable for bar axis color */
+  --save-button-bg: #6741d9; /* Define a variable for save button background color */
+  --save-button-hover-bg: #f0c3f1; /* Define a variable for save button hover background color */
+}
+
+.dashboard-container {
+  text-align: center;
+  color: var(--text-color);
+  width: 600px;
+}
+
+.dashboard-heading {
+  font-size: var(--heading-font-size);
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: var(--font-family);
+}
+
+.price-input {
+  margin-bottom: 10px;
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+  width: 600px;
+  align-items: flex-start;
+}
+
+@media only screen and (max-width: 600px) {
+  .price-input {
+    flex-direction: column; /* Display in a column for smaller screens */
+  }
+}
+
+.price-input .amount-label {
+  color: var(--text-color);
+  margin-right: 10px;
+  width: 400px;
+  text-align: left;
+  font-size: var(--font-size);
+}
+
+.price-input input {
+  flex: 1;
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  padding: 10px 5px;
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+  border: 1px solid var(--text-field-border);
+  text-align: center;
+}
+
+.radio-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 1;
+  padding: 0 40px;
+}
+
+.radio-buttons input {
+  margin-top: 2px;
+  background-color: var(--radio-button-bg);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--text-field-border);
+}
+
+.radio-buttons input:checked {
+  background-color: var(--selected-radio-button-bg);
+}
+
+.custom-request-amount {
+  width: 50%;
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  padding: 10px 5px;
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+  border: 1px solid var(--text-field-border);
+}
+
+.regular-song-amounts {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.regular-song-amounts input {
+  width: calc(25% - 10px);
+  margin: 5px;
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  padding: 10px 5px;
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+  border: 1px solid var(--text-field-border);
+}
+
+.song-amount-inputs {
+  display: flex;
+  justify-content: flex-end;
+  width: 400px;
+}
+
+.save-button {
+  background-color: var(--save-button-bg);
+  color: var(--text-color);
+  padding: 15px;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size);
+  font-family: var(--font-family);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.save-button:disabled {
+  cursor: not-allowed;
+}
+
+.save-button:hover,
+.save-button:active {
+  border: 1px solid var(--save-button-hover-bg);
+  background-color: var(--save-button-hover-bg);
+}
+.logout-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 24px;
+  outline: none;
+}

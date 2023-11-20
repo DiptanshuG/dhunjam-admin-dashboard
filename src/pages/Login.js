@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye,FaEyeSlash  } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = ({ handleLogin }) => {
   const [username, setUsername] = useState("");
@@ -13,7 +13,7 @@ const Login = ({ handleLogin }) => {
   const handleSignIn = async () => {
     try {
       const response = await fetch(
-        "https://stg.dhunjam.in/account/admin/login",
+        `${process.env.REACT_APP_API_BASE_URL}/account/admin/login`,
         {
           method: "POST",
           headers: {
@@ -29,7 +29,15 @@ const Login = ({ handleLogin }) => {
       const data = await response.json();
 
       if (response.status === 200 && data.response === "Success") {
-        handleLogin(data.data);
+        localStorage.setItem("token", data.data.token);
+
+        const decodedToken = parseJwt(data.data.token);
+        console.log({ decodedToken });
+        handleLogin({
+          id: decodedToken.user_id,
+          username: decodedToken.username,
+        });
+
         navigate("/dashboard");
       } else {
         setError("Invalid username or password");
@@ -37,6 +45,14 @@ const Login = ({ handleLogin }) => {
     } catch (error) {
       console.error("Error during login:", error);
       setError("Error during login. Please try again.");
+    }
+  };
+
+  const parseJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split(".")[1]));
+    } catch (e) {
+      return null;
     }
   };
 
@@ -72,7 +88,6 @@ const Login = ({ handleLogin }) => {
           <FaEye
             onClick={() => setShowPassword(!showPassword)}
             className="eye-icon"
-
           />
         )}
       </div>
