@@ -17,7 +17,11 @@
 .dashboard-container {
   text-align: center;
   color: var(--text-color);
-  width: 600px;
+  padding: 20px;
+  box-sizing: border-box;
+  height: 100vh;
+  position: relative;
+  width: 100vw;
 }
 
 .dashboard-heading {
@@ -26,32 +30,54 @@
   text-align: center;
   font-family: var(--font-family);
 }
+@media only screen and (max-width: 600px) {
+  .dashboard-heading {
+    font-size: 24px;
+  }
+}
+
+.inputs-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
 
 .price-input {
   margin-bottom: 10px;
   padding: 10px;
   display: flex;
-  justify-content: flex-end;
-  width: 600px;
-  align-items: flex-start;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+
+  @media only screen and (min-width: 600px) {
+    width: 600px;
+  }
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (min-width: 600px) {
   .price-input {
-    flex-direction: column; 
+    flex-direction: row;
+    justify-content: flex-end;
+    width: 600px;
+  }
+
+  .price-input .amount-label {
+    width: 400px;
+    margin-right: 10px;
+    text-align: left;
   }
 }
 
 .price-input .amount-label {
   color: var(--text-color);
-  margin-right: 10px;
-  width: 400px;
-  text-align: left;
+  margin-bottom: 5px;
   font-size: var(--font-size);
 }
 
 .price-input input {
-  flex: 1;
+  width: 100%;
   background-color: var(--background-color);
   border-radius: var(--border-radius);
   color: var(--text-color);
@@ -125,6 +151,7 @@
   font-size: var(--font-size);
   font-family: var(--font-family);
   width: 100%;
+  max-width: 600px;
   margin-top: 10px;
 }
 
@@ -147,4 +174,16 @@
   cursor: pointer;
   font-size: 24px;
   outline: none;
+}
+.centered-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: -120px;
+}
+
+@media only screen and (max-width: 600px) {
+  .centered-chart-container {
+    margin-left: 0;
+  }
 }

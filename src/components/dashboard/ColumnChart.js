@@ -21,12 +21,15 @@ const CustomTooltip = ({ active, payload, label }) => {
 
   return null;
 };
+
 const ColumnChart = ({ chartData }) => {
+  const isMobile = window.innerWidth < 600;
+
   return (
     <div id="line-column-chart">
       <div className="chart-container">
         <BarChart
-          width={600}
+          width={isMobile ? window.innerWidth - 30 : 600}
           height={300}
           data={chartData.labels.map((label, index) => ({
             label,
@@ -36,7 +39,11 @@ const ColumnChart = ({ chartData }) => {
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid stroke="transparent" strokeDasharray="3 3" />
-          <XAxis dataKey="label" />
+          <XAxis
+            dataKey="label"
+            angle={isMobile ? -45 : 0}
+            height={isMobile ? 60 : 20}
+          />
           <YAxis
             tick={false}
             label={
@@ -48,7 +55,7 @@ const ColumnChart = ({ chartData }) => {
             }
           />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="columnData" fill="#FFB6C1	" barSize={20} />
+          <Bar dataKey="columnData" fill="#FFB6C1" barSize={20} />
         </BarChart>
       </div>
     </div>

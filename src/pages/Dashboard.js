@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import ColumnChart from "../components/dashboard/ColumnChart";
 import { FaSignOutAlt } from "react-icons/fa";
 import Loader from "../components/Loader/Loader";
-import "../assets/styles/dashboard/Dashboard.css"
+import "../assets/styles/dashboard/Dashboard.css";
+import { fetchAdminDetails, updateAdminPrices } from "../services/api";
+import PriceInput from "../components/dashboard/PriceInput";
 
 const Dashboard = ({ userData }) => {
   const [adminDetails, setAdminDetails] = useState({});
@@ -12,73 +14,80 @@ const Dashboard = ({ userData }) => {
 
   useEffect(() => {
     if (userData && userData.id) {
-      fetchAdminDetails(userData.id);
+      fetchAdminData(userData.id);
     }
   }, [userData]);
-  
 
-
-  const fetchAdminDetails = async (userId) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/account/admin/${userId}`);
-      const data = await response.json();
-
-      if (response.status === 200 && data.response === "Success") {
-        setAdminDetails(data.data);
-        setEditedPrices(data.data.amount);
-      } else {
-        console.error("Error fetching Admin Details");
-      }
-    } catch (error) {
-      console.error("Error during fetchAdminDetails:", error);
-    } finally {
-      setLoading(false);
+  const fetchAdminData = async (userId) => {
+    setLoading(true);
+    const adminData = await fetchAdminDetails(userId);
+    if (adminData) {
+      setAdminDetails(adminData);
+      setEditedPrices(adminData.amount);
     }
+    setLoading(false);
   };
 
   const handlePriceEdit = (category, value) => {
-    setEditedPrices((prevPrices) => ({
-      ...prevPrices,
-      [category]: +value,
-    }));
-    setSaveButtonDisabled(false);
-  };
+    const numericValue = +value;
 
+    // Check if the category is "charge_customers"
+    if (category === "charge_customers") {
+      setAdminDetails((details) => ({
+        ...details,
+        charge_customers: value,
+      }));
+      setSaveButtonDisabled(value === false);
+    } else if (category === "customRequestAmount") {
+      // Enable save button only if the value is higher than 99
+      setSaveButtonDisabled(numericValue <= 99);
+      setEditedPrices((prevPrices) => ({
+        ...prevPrices,
+        category_6: value,
+      }));
+    } else if (category.startsWith("category_")) {
+      // Check minimum values for Regular Song Request Amounts
+      const minValues = {
+        category_7: 79,
+        category_8: 59,
+        category_9: 39,
+        category_10: 19,
+      };
+      const minAllowed = minValues[category];
+      const isValid = numericValue >= minAllowed;
 
-  const handleSavePrices = async () => {
-    const modifiedCategories = {};
-Object.entries(editedPrices).forEach(([key, value]) => {
-  if (key.startsWith("category_") && value !== adminDetails.amount[key]) {
-    modifiedCategories[key] = value;
-  }
-});
-
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/account/admin/${userData.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            amount: modifiedCategories,
-          }),
+      // Enable save button only if all values are higher than the minimum values
+      const areAllValuesValid = Object.entries(minValues).every(
+        ([key, minValue]) => {
+          const currentValue = editedPrices[key] || 0;
+          return currentValue >= minValue;
         }
       );
 
-      const data = await response.json();
-      console.log(data);
+      setSaveButtonDisabled(!isValid || !areAllValuesValid);
+    } else {
+      // Enable save button for other categories
+      setSaveButtonDisabled(false);
+    }
 
-      if (response.status === 200 && data.response === "Success") {
-        fetchAdminDetails(userData.id);
-        setSaveButtonDisabled(true);
-      } else {
-        console.error("Error updating prices");
+    setEditedPrices((prevPrices) => ({
+      ...prevPrices,
+      [category]: numericValue,
+    }));
+  };
+
+  const handleSavePrices = async () => {
+    const modifiedCategories = {};
+    Object.entries(editedPrices).forEach(([key, value]) => {
+      if (key.startsWith("category_") && value !== adminDetails.amount[key]) {
+        modifiedCategories[key] = value;
       }
-    } catch (error) {
-      console.error("Error during handleSavePrices:", error);
+    });
+
+    const success = await updateAdminPrices(userData.id, modifiedCategories);
+    if (success) {
+      fetchAdminData(userData.id);
+      setSaveButtonDisabled(true);
     }
   };
 
@@ -98,92 +107,33 @@ Object.entries(editedPrices).forEach(([key, value]) => {
   if (loading) {
     return <Loader />;
   }
+
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-heading">
-        {" "}
-        {adminDetails.name}, {adminDetails.location} on Dhun Jam
-      </h1>
-
       <div>
-        <div className="price-input">
-          <label className="amount-label">
-            Do you want to change your
-            <br /> customers for requesting songs?{" "}
-          </label>
-          <div className="radio-buttons">
-            <input
-              type="radio"
-              id="changeYes"
-              name="changeRequest"
-              value="Yes"
-              checked={editedPrices.changeRequest === "Yes"}
-              onChange={() => handlePriceEdit("changeRequest", "Yes")}
-            />
-            <label htmlFor="changeYes">Yes</label>
-            <input
-              type="radio"
-              id="changeNo"
-              name="changeRequest"
-              value="No"
-              checked={editedPrices.changeRequest === "No"}
-              onChange={() => handlePriceEdit("changeRequest", "No")}
-            />
-            <label htmlFor="changeNo">No</label>
-          </div>
+        <h1 className="dashboard-heading">
+          {adminDetails.name}, {adminDetails.location} on Dhun Jam
+        </h1>
+        <PriceInput
+          editedPrices={editedPrices}
+          handlePriceEdit={handlePriceEdit}
+          adminDetails={adminDetails}
+        />
+        <div className="centered-chart-container">
+          <ColumnChart chartData={chartData} />
         </div>
-        <div className="price-input ">
-          <label className="amount-label">Custom Song Request Amount-</label>
-          <input
-            type="number"
-            value={editedPrices.category_6 || ""}
-            onChange={(e) =>
-              handlePriceEdit("customRequestAmount", e.target.value)
-            }
-            className="custom-request-amount"
-          />
-        </div>
-        <div className="price-input regular-song-amounts">
-          <label className="amount-label">
-            Regular Song Request Amounts, <br />
-            from high to low-
-          </label>
-          <div
-            style={{ display: "flex", justifyContent: "end", width: "400px" }}
-          >
-            {Object.entries(editedPrices)
-              .filter(([key]) => key.startsWith("category_"))
-              .map(([category, originalPrice]) => (
-                <input
-                  type="number"
-                  value={editedPrices[category] || ""}
-                  onChange={(e) => handlePriceEdit(category, e.target.value)}
-                  key={category}
-                />
-              ))}
-          </div>
-        </div>
+
+        <button
+          className="save-button"
+          onClick={handleSavePrices}
+          disabled={isSaveButtonDisabled}
+        >
+          Save
+        </button>
+        <button className="logout-button" title="logout" onClick={handleLogout}>
+          <FaSignOutAlt />
+        </button>
       </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          margin: "25px 0",
-        }}
-      >
-        <ColumnChart chartData={chartData} />
-      </div>
-      <button
-        className="save-button"
-        onClick={handleSavePrices}
-        disabled={isSaveButtonDisabled}
-      >
-        Save
-      </button>
-      <button className="logout-button" title="logout" onClick={handleLogout}>
-        <FaSignOutAlt />
-      </button>
     </div>
   );
 };
